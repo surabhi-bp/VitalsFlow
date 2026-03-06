@@ -583,8 +583,18 @@ async def whatsapp_reply(
     From: str = Form(...),
     Body: str = Form(...)
 ):
+    phone = From.replace("whatsapp:", "").strip()
 
-    phone = From.replace("whatsapp:+91", "").replace("whatsapp:+", "")
+    # Remove country code
+    if phone.startswith("+91"):
+        phone = phone[3:]
+    elif phone.startswith("91") and len(phone) == 12:
+        phone = phone[2:]
+
+    # Always match last 10 digits
+    phone = phone[-10:]
+
+    print(f"Looking for phone: {phone}")
     message = Body.lower()
 
     patient = supabase.table("patients").select("*").eq("phone", phone).execute().data
