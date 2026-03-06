@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+openai
+joblib
+pandas
+xgboost
+python-dotenv
+supabase
+python-multipart
