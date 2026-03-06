@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
 
 const API = "https://vitalsflow-production.up.railway.app"; // ← your FastAPI backend
 
@@ -243,8 +242,8 @@ function WaIcon({ size = 20, color = "currentColor" }) {
 }
 
 // ─── MAIN PAGE COMPONENT ──────────────────────────────────────────
-export default function PatientChatPage() {
-  const { visitId } = useParams(); // Using React Router!
+export default function PatientChatPage(props) {
+  const { visitId } = props; // passed from App.jsx
   
   const [visit, setVisit] = useState(null);
   const [loading, setLoading] = useState(true);

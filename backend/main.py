@@ -22,9 +22,9 @@ app = FastAPI(title="VitalsFlow API")
 
 # --- UPDATED CORS CONFIGURATION ---
 origins = [
-    "http://localhost:5173",  # Your local Vite dev server
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
-    # Add your production frontend URL here later when you deploy it
+    "https://vitals-flow.vercel.app",
 ]
 
 app.add_middleware(

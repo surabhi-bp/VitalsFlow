@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 
 // --- Imports for your existing components ---
-// Ensure these files exist in your project folder alongside App.jsx
 import DoctorPortal from './DoctorPortal';
 import ReceptionistPortal from './ReceptionistPortal';
+import PatientChatPage from './PatientChatPage';
 
 // --- Reusable Brand Logo Component to ensure 100% consistency ---
 const BrandLogo = ({ size = "normal" }) => (
@@ -27,9 +27,17 @@ const LandingPage = ({ onLogin }) => {
       {/* Navbar */}
       <nav className="landing-nav">
         <BrandLogo />
+        <div className="nav-actions">
+          <button className="btn-secondary" onClick={() => onLogin('receptionist')}>
+            Front Desk Login
+          </button>
+          <button className="btn-primary" onClick={() => onLogin('doctor')}>
+            Physician Login
+          </button>
+        </div>
       </nav>
 
-      {/* Hero Section with Left-to-Right Fade Background */}
+      {/* Hero Section with Left-to-Right Fade Gradient Image Background */}
       <header className="hero-section">
         <div className="hero-content">
           <div className="badge">SECURE HOSPITAL NETWORK</div>
@@ -137,6 +145,13 @@ const LandingPage = ({ onLogin }) => {
 
 // --- MAIN APP (ROUTER & LAYOUT) ---
 function App() {
+  // Check if URL is a chat link e.g. /chat/abc-123
+  const path = window.location.pathname;
+  if (path.startsWith('/chat/')) {
+    const visitId = path.split('/chat/')[1];
+    return <PatientChatPage visitId={visitId} />;
+  }
+
   const [userRole, setUserRole] = useState(null); // 'doctor' or 'receptionist'
   const [currentView, setCurrentView] = useState(null); // 'doctor' or 'receptionist'
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -228,9 +243,6 @@ function App() {
             </div>
           </header>
           
-          {/* REMOVED: padding and overflow-y: auto.
-            This ensures the portals stretch to fit the space exactly without forcing an external scrollbar. 
-          */}
           <div className="dashboard-content">
             {currentView === 'doctor' && <DoctorPortal />}
             {currentView === 'receptionist' && <ReceptionistPortal />}
@@ -247,25 +259,21 @@ const Styles = () => (
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     :root {
-      /* Main App Palette - The Vibrant Royal Blue */
       --primary: #2563eb;         
       --primary-hover: #1d4ed8;
       --secondary: #eff6ff;       
       
-      /* Sidebar Palette - The Dark Navy */
       --sidebar-bg: #0b1120;      
       --sidebar-hover: #1e293b;   
       --sidebar-active: #3b82f6;  
       --sidebar-text: #cbd5e1;
       
-      /* Whites & Greys for Content Area */
       --text-main: #0f172a;       
       --text-muted: #64748b;      
       --bg-main: #f8fafc;         
       --white: #ffffff;
       --border: #e2e8f0;
       
-      /* Shadows */
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
       --shadow-glow: 0 4px 14px rgba(37, 99, 235, 0.3);
@@ -274,7 +282,6 @@ const Styles = () => (
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-    /* GLOBAL BUTTONS */
     button { cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: none; }
     .btn-primary { background: var(--primary); color: var(--white); padding: 0.65rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
     .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
@@ -283,7 +290,6 @@ const Styles = () => (
     .large { padding: 0.85rem 1.75rem; font-size: 1rem; border-radius: 10px; }
     .shadow-glow { box-shadow: var(--shadow-glow); }
 
-    /* BRAND LOGO CONSISTENCY */
     .brand { display: flex; align-items: center; gap: 0.75rem; }
     .brand-icon { width: 34px; height: 34px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(37,99,235,0.3); flex-shrink: 0; }
     .brand-icon.small { width: 30px; height: 30px; border-radius: 8px; box-shadow: none; }
@@ -292,13 +298,11 @@ const Styles = () => (
     .text-light { color: var(--white); font-size: 1.2rem; }
     .text-primary { color: var(--primary); }
 
-    /* LANDING PAGE */
     .landing-container { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-main); }
     
     .landing-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 5%; background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
     .nav-actions { display: flex; gap: 1rem; }
 
-    /* Hero Section with Left-to-Right Fade Gradient Image Background */
     .hero-section { 
       display: flex; 
       align-items: center; 
@@ -339,7 +343,6 @@ const Styles = () => (
       justify-content: center; 
     }
 
-    /* Features Section */
     .features-section { padding: 6rem 5%; background: var(--white); }
     .section-header { text-align: center; margin-bottom: 4rem; max-width: 600px; margin-inline: auto; }
     .section-header h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; color: var(--text-main); }
@@ -352,7 +355,6 @@ const Styles = () => (
     .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main); }
     .feature-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
 
-    /* Trust Section */
     .trust-section { padding: 6rem 5%; background: var(--bg-main); border-top: 1px solid var(--border); display: flex; justify-content: center; }
     .trust-content { max-width: 800px; width: 100%; text-align: center; }
     .trust-content h2 { font-size: 2rem; font-weight: 800; margin-bottom: 3rem; letter-spacing: -0.02em; color: var(--text-main); }
@@ -362,10 +364,8 @@ const Styles = () => (
     .trust-item h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); }
     .trust-item p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
 
-    /* DASHBOARD LAYOUT */
     .dashboard-layout { display: flex; height: 100vh; overflow: hidden; background: var(--bg-main); }
     
-    /* DARK NAVY SIDEBAR */
     .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid #1e293b; display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 50; flex-shrink: 0; }
     .sidebar.collapsed { width: 80px; }
     
@@ -377,12 +377,10 @@ const Styles = () => (
     .sidebar-nav { padding: 1.5rem 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
     .nav-section-title { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 0.5rem 0.5rem; margin-top: 0.5rem; }
     
-    /* Sidebar Buttons */
     .nav-btn { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1rem; width: 100%; border-radius: 8px; color: var(--sidebar-text); font-weight: 600; font-size: 0.9rem; background: transparent; transition: all 0.2s; white-space: nowrap; overflow: hidden; }
     .sidebar.collapsed .nav-btn { justify-content: center; padding: 0.85rem; }
     .nav-btn:hover { background: var(--sidebar-hover); color: var(--white); }
     
-    /* Active State */
     .nav-btn.active { background: var(--sidebar-active); color: var(--white); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
     
     .sidebar-footer { padding: 1.5rem 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 1rem; }
@@ -395,10 +393,8 @@ const Styles = () => (
     .dot.pulse { animation: pulse 2s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-    /* DASHBOARD MAIN CONTENT */
     .dashboard-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     
-    /* Topbar */
     .dashboard-topbar { height: 72px; background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10; }
     .topbar-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; color: var(--primary); }
     
@@ -409,12 +405,8 @@ const Styles = () => (
     .user-role-badge { font-size: 0.7rem; color: var(--primary); font-weight: 600; }
     .avatar { width: 38px; height: 38px; border-radius: 8px; background: var(--secondary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; border: 1px solid #bfdbfe; }
     
-    /* PORTAL CONTAINER
-      Removed padding and overflow-y: auto so the nested components fit completely flush. 
-    */
     .dashboard-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
     
-    /* Responsive Adjustments */
     @media (max-width: 1024px) {
       .hero-section { flex-direction: column; text-align: center; padding-top: 4rem; padding-bottom: 4rem; background: linear-gradient(rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.95)), url('https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=2073&auto=format&fit=crop'); }
       .hero-content { display: flex; flex-direction: column; align-items: center; }
