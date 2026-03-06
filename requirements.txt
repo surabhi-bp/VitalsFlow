@@ -1,10 +1,10 @@
 fastapi
 uvicorn
-pydantic
+python-multipart
+supabase
 openai
 joblib
 pandas
 xgboost
 python-dotenv
-supabase
-python-multipart
+pydantic
