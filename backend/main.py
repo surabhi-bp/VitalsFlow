@@ -576,3 +576,67 @@ def process_aftercare_chat(req: ChatMessage):
     except Exception as e:
         print(f"Chat Error: {e}")
         return {"status": "error", "reply": "I'm having trouble connecting to my servers right now. Please call the clinic directly if it's urgent."}
+from fastapi import Form
+
+@app.post("/api/whatsapp/reply")
+async def whatsapp_reply(
+    From: str = Form(...),
+    Body: str = Form(...)
+):
+
+    phone = From.replace("whatsapp:+91", "").replace("whatsapp:+", "")
+    message = Body.lower()
+
+    patient = supabase.table("patients").select("*").eq("phone", phone).execute().data
+
+    if not patient:
+        return {"status": "not found"}
+
+    visit = supabase.table("visits").select(
+        "*, patients(*), consultation_notes(*), prescriptions(*)"
+    ).eq("patient_id", patient[0]["id"]).order("created_at", desc=True).limit(1).execute().data
+
+    if not visit:
+        return {"status": "no visit"}
+
+    visit = visit[0]
+    name = visit["patients"]["name"]
+
+    items = visit["prescriptions"][0]["items"] if visit.get("prescriptions") else []
+    meds = [i["name"] for i in items if i["type"] == "medication"]
+
+    med_list = ", ".join(meds)
+
+    prompt = f"""
+You are a friendly nurse at VitalsFlow hospital.
+
+Patient name: {name}
+Medicines prescribed: {med_list}
+
+Patient message: "{Body}"
+
+If they said YES → praise them and ask about symptoms.
+If they said NO → remind them to take medicine.
+If symptoms worsen → suggest doctor visit.
+
+Keep reply short (WhatsApp style).
+End message with:
+— VitalsFlow Care Team 💙
+"""
+
+    llm = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+        max_tokens=150
+    )
+
+    reply = llm.choices[0].message.content
+
+    twilio_client.messages.create(
+        from_=TWILIO_FROM,
+        to=From,
+        body=reply
+    )
+
+    return {"status": "ok"}
