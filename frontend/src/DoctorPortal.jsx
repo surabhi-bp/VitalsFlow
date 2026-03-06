@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL || 'https://vitalsflow-production.up.railway.app';
 
 export default function DoctorPortal() {
   const [doctor, setDoctor] = useState(null);
