@@ -6,7 +6,9 @@ import os
 import joblib
 import pandas as pd
 import json
+from twilio.rest import Client as TwilioClient
 from dotenv import load_dotenv 
+
 
 # Load the secrets from the .env file
 load_dotenv() 
@@ -37,6 +39,10 @@ app.add_middleware(
 # 2. Set up AI Client
 # Grab the key securely from the environment
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_FROM = os.getenv("TWILIO_WHATSAPP_FROM")
+twilio_client = TwilioClient(TWILIO_SID, TWILIO_TOKEN)
 
 client = openai.OpenAI(
     base_url="https://api.groq.com/openai/v1",
@@ -358,11 +364,70 @@ def get_doctor_visits(doctor_id: str):
     ).eq("doctor_id", doctor_id).in_("status", ["waiting", "in_consultation"]).execute()
     return result.data
 
-@app.patch("/api/visits/{visit_id}")
-def update_visit(visit_id: str, update: VisitUpdate):
-    data = {k: v for k, v in update.model_dump().items() if v is not None}
-    result = supabase.table("visits").update(data).eq("id", visit_id).execute()
-    return result.data[0]
+@app.patch("/api/bills/{bill_id}/pay")
+def mark_bill_paid(bill_id: str):
+    from datetime import datetime, timezone
+
+    # Mark bill paid
+    result = supabase.table("bills").update({
+        "status": "paid",
+        "paid_at": datetime.now(timezone.utc).isoformat()
+    }).eq("id", bill_id).execute()
+
+    visit_id = result.data[0]["visit_id"]
+
+    # Update visit status
+    supabase.table("visits").update({
+        "status": "paid"
+    }).eq("id", visit_id).execute()
+
+    # Fetch full visit data
+    visit = supabase.table("visits").select(
+        "*, patients(*), consultation_notes(*), prescriptions(*)"
+    ).eq("id", visit_id).execute().data[0]
+
+    patient = visit["patients"]
+    phone = patient.get("phone", "")
+    name = patient.get("name", "Patient")
+
+    # Extract medicines
+    items = visit["prescriptions"][0]["items"] if visit.get("prescriptions") else []
+    meds = [i for i in items if i["type"] == "medication"]
+
+    med_lines = ""
+    for m in meds:
+        timing = []
+        if m.get("morning"): timing.append("Morning")
+        if m.get("afternoon"): timing.append("Afternoon")
+        if m.get("night"): timing.append("Night")
+
+        med_lines += f"\n• {m['name']} — {', '.join(timing)}, {m.get('food','After Food')}, {m.get('duration','as prescribed')}"
+
+    message = f"""
+🏥 Hello {name}!
+
+Your consultation is complete and payment has been received.
+
+💊 Medicines:
+{med_lines}
+
+Please reply YES once you take your medicines today.
+
+— VitalsFlow Care Team
+"""
+
+    if phone:
+        try:
+            twilio_client.messages.create(
+                from_=TWILIO_FROM,
+                to=f"whatsapp:+91{phone}",
+                body=message
+            )
+            print("WhatsApp message sent")
+        except Exception as e:
+            print(f"Twilio Error: {e}")
+
+    return {"status": "success"}
 
 # ── CONSULTATION SAVE ──────────────────────────────────────────
 from typing import Dict, List, Any

@@ -8,3 +8,4 @@ pandas
 xgboost
 python-dotenv
 pydantic
+twilio
