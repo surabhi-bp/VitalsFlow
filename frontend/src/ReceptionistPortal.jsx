@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 
 const API = 'https://vitalsflow-production.up.railway.app';
 
-
 // ─── AFTERCARE LINK BOX COMPONENT ──────────────────────────────────────────
-function AftercareLinkBox({ phone }) {
-
+function AftercareLinkBox({ phone, visitId }) {
   const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+  
+  // Dynamically build the exact URL based on where the app is hosted (localhost or vercel)
+  const chatUrl = `${window.location.origin}/chat/${visitId}`;
+  
+  // The message pre-filled in WhatsApp
+  const waMessage = encodeURIComponent(`Hi! Your discharge process is complete. Please click here to access your 24/7 AI Aftercare Portal, view your prescriptions, and ask any questions about your recovery: ${chatUrl}`);
 
   return (
     <div
@@ -19,44 +23,85 @@ function AftercareLinkBox({ phone }) {
         padding: "1rem",
         display: "flex",
         flexDirection: "column",
-        gap: "0.6rem"
+        gap: "0.8rem"
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <span style={{ fontSize: "1rem" }}>✅</span>
+        <span style={{ fontSize: "1.2rem" }}>✅</span>
         <span style={{
           color: "#15803d",
           fontWeight: 800,
-          fontSize: "0.85rem",
+          fontSize: "0.9rem",
           textTransform: 'uppercase'
         }}>
-          WhatsApp AI Activated
+          Aftercare Chat Ready
         </span>
       </div>
 
-      <div style={{ color: "#166534", fontSize: "0.8rem" }}>
-        The automated AI aftercare message has been sent to the patient.
-        They can reply directly on WhatsApp to talk with the AI nurse.
+      <div style={{ color: "#166534", fontSize: "0.85rem", lineHeight: 1.5 }}>
+        The personalized aftercare portal has been generated. Send the secure link below to the patient's WhatsApp.
+      </div>
+      
+      {/* Visual representation of the link so the receptionist knows what they are sending */}
+      <div style={{ 
+        background: "white", 
+        border: "1px solid #bbf7d0", 
+        borderRadius: 8, 
+        padding: "0.5rem 0.75rem", 
+        fontSize: "0.75rem", 
+        color: "#15803d",
+        fontFamily: "monospace",
+        wordBreak: "break-all"
+      }}>
+        {chatUrl}
       </div>
 
-      <a
-        href={`https://wa.me/${cleanPhone}`}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          textDecoration: "none",
-          background: "#25d366",
-          color: "white",
-          borderRadius: 8,
-          padding: "0.5rem 1rem",
-          fontSize: "0.8rem",
-          fontWeight: 700,
-          textAlign: "center"
-        }}
-      >
-        Send Manually via WhatsApp
-      </a>
+      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.2rem' }}>
+        <button 
+          onClick={() => navigator.clipboard.writeText(chatUrl)}
+          style={{
+            flex: 1,
+            background: "white",
+            border: "1px solid #16a34a",
+            color: "#16a34a",
+            borderRadius: 8,
+            padding: "0.6rem 1rem",
+            fontSize: "0.8rem",
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "all 0.2s"
+          }}
+          onMouseEnter={e => e.target.style.background = "#f0fdf4"}
+          onMouseLeave={e => e.target.style.background = "white"}
+        >
+          Copy Link
+        </button>
 
+        <a
+          href={`https://wa.me/${cleanPhone}?text=${waMessage}`}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            flex: 2,
+            textDecoration: "none",
+            background: "#25d366",
+            color: "white",
+            borderRadius: 8,
+            padding: "0.6rem 1rem",
+            fontSize: "0.8rem",
+            fontWeight: 700,
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.4rem",
+            boxShadow: "0 2px 4px rgba(37, 211, 102, 0.2)"
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Send via WhatsApp
+        </a>
+      </div>
     </div>
   );
 }
@@ -391,9 +436,13 @@ export default function Receptionist() {
                 </>
               )}
 
-              {/* NEW AFTERCARE LINK BOX (Replaces the old text area) */}
+              {/* NEW AFTERCARE LINK BOX */}
               {selectedPatientView.bill?.status === 'paid' ? (
-                <AftercareLinkBox phone={selectedPatientView.patients?.phone} />
+                // Now passing the actual visit ID so the link can be generated!
+                <AftercareLinkBox 
+                  phone={selectedPatientView.patients?.phone} 
+                  visitId={selectedPatientView.id} 
+                />
               ) : (
                  <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
                     <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💬</div>
@@ -677,7 +726,7 @@ export default function Receptionist() {
                             </div>
                             {isPaid && (
                               <div style={{ borderTop: "none", marginBottom: "1rem" }} onClick={(e) => e.stopPropagation()}>
-                                <AftercareLinkBox phone={bill.visits?.patients?.phone} />
+                                <AftercareLinkBox phone={bill.visits?.patients?.phone} visitId={bill.visit_id} />
                               </div>
                             )}
                           </div>
