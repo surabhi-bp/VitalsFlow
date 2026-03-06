@@ -18,13 +18,21 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI(title="VitalsFlow API")
 
+# --- UPDATED CORS CONFIGURATION ---
+origins = [
+    "http://localhost:5173",  # Your local Vite dev server
+    "http://127.0.0.1:5173",
+    # Add your production frontend URL here later when you deploy it
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=origins, 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# ----------------------------------
 
 # 2. Set up AI Client
 # Grab the key securely from the environment
