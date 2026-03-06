@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
-const API = "http://localhost:8000"; // ← your FastAPI backend
+const API = "https://vitalsflow-production.up.railway.app"; // ← your FastAPI backend
 
 // ─── Helpers ─────────────────────────────────────────────────────
 const getTime = () =>
