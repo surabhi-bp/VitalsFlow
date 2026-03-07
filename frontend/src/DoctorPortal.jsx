@@ -31,19 +31,49 @@ export default function DoctorPortal() {
   };
 
   useEffect(() => {
-    fetch(`${API}/api/doctors`)
-      .then(r => r.json())
-      .then(setDoctors)
-      .catch(console.error);
+    const loadDoctors = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        
+        const response = await fetch(`${API}/api/doctors`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setDoctors(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Failed to load doctors:', error);
+        setDoctors([]);
+        showToast('Failed to load doctors. Check your backend connection.', 'error');
+      }
+    };
+    
+    loadDoctors();
   }, []);
 
   const fetchQueue = async () => {
     if (!doctor) return;
     try {
-      const res = await fetch(`${API}/api/visits/doctor/${doctor.id}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const res = await fetch(`${API}/api/visits/doctor/${doctor.id}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) {
+        throw new Error(`API error: ${res.status}`);
+      }
+      
       const data = await res.json();
       setVisits(Array.isArray(data) ? data : []);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error('Failed to fetch queue:', e);
+      setVisits([]);
+    }
   };
 
   useEffect(() => {
@@ -63,10 +93,21 @@ export default function DoctorPortal() {
     setSelectedVisit(visit);
     setClinicalData(null); setTranscription('');
     setSelectedTests([]); setSelectedMeds([]);
-    await fetch(`${API}/api/visits/${visit.id}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'in_consultation' })
-    });
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      await fetch(`${API}/api/visits/${visit.id}`, {
+        method: 'PATCH', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'in_consultation' }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+    } catch (e) {
+      console.error('Failed to update visit status:', e);
+      showToast('Warning: Could not update visit status', 'error');
+    }
     setView('consultation');
     fetchQueue();
   };

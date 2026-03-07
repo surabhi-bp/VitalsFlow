@@ -259,7 +259,13 @@ export default function PatientChatPage(props) {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${API}/api/visits/${visitId}`);
+        // Add timeout to fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const res = await fetch(`${API}/api/visits/${visitId}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
         if (!res.ok) throw new Error("Visit not found");
         const data = await res.json();
 
@@ -302,12 +308,18 @@ export default function PatientChatPage(props) {
     setIsTyping(true);
 
     try {
+      // Add timeout to fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       // 🚀 HITTING YOUR FASTAPI BACKEND INSTEAD OF ANTHROPIC!
       const res = await fetch(`${API}/api/chat/aftercare`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visit_id: visitId, message: text })
+        body: JSON.stringify({ visit_id: visitId, message: text }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       
       const data = await res.json();
       
