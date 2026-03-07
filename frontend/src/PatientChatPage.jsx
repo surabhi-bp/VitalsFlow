@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-const API = "https://vitalsflow-production.up.railway.app"; // ← your FastAPI backend
+// PatientChatPage.jsx
+const API = "https://vitalsflow-production.up.railway.app"; // No trailing slash! // ← your FastAPI backend
 
 // ─── Helpers ─────────────────────────────────────────────────────
 const getTime = () =>
