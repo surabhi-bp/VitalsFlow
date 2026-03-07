@@ -8,6 +8,7 @@ import pandas as pd
 import json
 from twilio.rest import Client as TwilioClient
 from dotenv import load_dotenv 
+from triage_predict import predict_triage
 
 
 # Load the secrets from the .env file
@@ -651,3 +652,12 @@ End message with:
     )
 
     return {"status": "ok"}
+
+@app.post("/triage")
+def triage(age:int, hr:int, rr:int, temp:float, spo2:int, bp:int):
+
+    level = predict_triage(age, hr, rr, temp, spo2, bp)
+
+    return {
+        "triage_level": level
+    }
