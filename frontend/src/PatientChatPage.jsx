@@ -258,8 +258,7 @@ export default function PatientChatPage(props) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); 
         
-        const res = await fetch(`${API}/api/visits/${visitId}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
+        const res = await fetch(API + "/api/visits/" + visitId, { signal: controller.signal });
         
         if (!res.ok) throw new Error("Medical record not found.");
         const json = await res.json();
