@@ -28,12 +28,7 @@ const LandingPage = ({ onLogin }) => {
       <nav className="landing-nav">
         <BrandLogo />
         <div className="nav-actions">
-          <button className="btn-secondary" onClick={() => onLogin('receptionist')}>
-            Front Desk Login
-          </button>
-          <button className="btn-primary" onClick={() => onLogin('doctor')}>
-            Physician Login
-          </button>
+         
         </div>
       </nav>
 

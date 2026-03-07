@@ -35,7 +35,7 @@ export default function DoctorPortal() {
     const loadDoctors = async () => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000); 
         
         const response = await fetch(`${API}/api/doctors`, { signal: controller.signal });
         clearTimeout(timeoutId);
@@ -45,7 +45,6 @@ export default function DoctorPortal() {
         }
         
         const data = await response.json();
-        // Defensive check to prevent .map crash
         setDoctors(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to load doctors:', error);
@@ -71,7 +70,6 @@ export default function DoctorPortal() {
       }
       
       const data = await res.json();
-      // Defensive check to prevent .map crash
       setVisits(Array.isArray(data) ? data : []);
     } catch (e) { 
       console.error('Failed to fetch queue:', e);
@@ -533,6 +531,7 @@ export default function DoctorPortal() {
                             <div className="d-vitals-row">
                               {visit.hr>0&&<span className="d-vital-chip">HR: {visit.hr}</span>}
                               {visit.sbp>0&&<span className="d-vital-chip">BP: {visit.sbp}/{visit.dbp}</span>}
+                              {visit.saturation>0&&<span className="d-vital-chip">SpO2: {visit.saturation}%</span>}
                               {visit.bt>0&&<span className="d-vital-chip">Temp: {visit.bt}°C</span>}
                             </div>
                           </div>
@@ -553,12 +552,27 @@ export default function DoctorPortal() {
                 <div className="d-card">
                   <div className="d-card-header"><div className="d-card-icon"><Icons.Mic/></div><span className="d-card-title">AI Scribe</span></div>
                   <div className="d-card-body">
+                    {/* UPDATED PATIENT PROFILE BOX WITH ALL DETAILS */}
                     <div className="d-patient-info-box">
+                      <div style={{fontSize:'0.7rem',fontWeight:'700',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:'0.75rem'}}>Patient Profile & Vitals</div>
                       <div className="d-info-grid">
                         <div className="d-info-item"><span className="d-info-label">Name</span><span className="d-info-value">{selectedVisit.patients?.name}</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Age</span><span className="d-info-value">{selectedVisit.patients?.age} yrs</span></div>
+                        <div className="d-info-item"><span className="d-info-label">Age / Gender</span><span className="d-info-value">{selectedVisit.patients?.age} yrs</span></div>
+                        <div className="d-info-item"><span className="d-info-label">Phone</span><span className="d-info-value">{selectedVisit.patients?.phone || '—'}</span></div>
+                        <div className="d-info-item"><span className="d-info-label">Blood Pressure</span><span className="d-info-value">{selectedVisit.sbp}/{selectedVisit.dbp} mmHg</span></div>
+                        <div className="d-info-item"><span className="d-info-label">Heart Rate</span><span className="d-info-value">{selectedVisit.hr} bpm</span></div>
+                        <div className="d-info-item"><span className="d-info-label">Resp. Rate</span><span className="d-info-value">{selectedVisit.rr} bpm</span></div>
+                        <div className="d-info-item"><span className="d-info-label">SpO2</span><span className="d-info-value">{selectedVisit.saturation}%</span></div>
+                        <div className="d-info-item"><span className="d-info-label">Temperature</span><span className="d-info-value">{selectedVisit.bt}°C</span></div>
                       </div>
+                      {selectedVisit.symptoms && (
+                        <div style={{marginTop:'1rem', padding:'0.75rem', background:'white', borderRadius:'8px', border:'1px solid #e2e8f0'}}>
+                          <span className="d-info-label">Triage Notes:</span>
+                          <p style={{fontSize:'0.85rem', color:'#475569', marginTop:'0.25rem', fontStyle:'italic'}}>{selectedVisit.symptoms}</p>
+                        </div>
+                      )}
                     </div>
+
                     {!isRecording
                       ? <button className="d-record-btn d-record-start" onClick={startRecording}><Icons.Mic/> Start Listening</button>
                       : <button className="d-record-btn d-record-stop" onClick={stopRecording}><div className="pulse-dot"/> Stop Recording</button>

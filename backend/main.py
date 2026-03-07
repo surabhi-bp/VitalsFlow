@@ -653,11 +653,3 @@ End message with:
 
     return {"status": "ok"}
 
-@app.post("/triage")
-def triage(age:int, hr:int, rr:int, temp:float, spo2:int, bp:int):
-
-    level = predict_triage(age, hr, rr, temp, spo2, bp)
-
-    return {
-        "triage_level": level
-    }
