@@ -3,22 +3,49 @@ import { useState, useEffect } from 'react';
 const API = 'https://vitalsflow-production.up.railway.app';
 
 // ─── AFTERCARE LINK BOX COMPONENT ──────────────────────────────────────────
-function AftercareLinkBox({ phone, visitId }) {
+function AftercareLinkBox({ phone, visitId, visit }) {
+  const [sent, setSent] = useState(false);
   const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
-  
-  // Dynamically build the exact URL based on where the app is hosted (localhost or vercel)
   const chatUrl = `${window.location.origin}/chat/${visitId}`;
-  
-  // The message pre-filled in WhatsApp
-  const waMessage = encodeURIComponent(`Hi! Your discharge process is complete. Please click here to access your 24/7 AI Aftercare Portal, view your prescriptions, and ask any questions about your recovery: ${chatUrl}`);
+
+  const buildSMS = () => {
+    const name = visit?.patients?.name || 'there';
+
+    const rxItems = visit?.prescriptions?.[0]?.items || [];
+    const rxLines = rxItems
+      .filter(item => item.type === 'medication')
+      .map(item => {
+        const parts = [item.name];
+        if (item.duration) parts.push(item.duration);
+        if (item.food) parts.push(item.food);
+        return `• ${parts.join(' - ')}`;
+      });
+
+    const lines = [
+      `Hi ${name}! 👋 Your discharge from VitalsFlow is complete.`,
+      '',
+      ...(rxLines.length ? ['💊 Your Prescriptions:', ...rxLines, ''] : []),
+      '🔗 Access your 24/7 Aftercare Portal here:',
+      chatUrl,
+      '',
+      'Get well soon! 🌿',
+    ];
+
+    return lines.join('\n');
+  };
+
+  const handleSend = () => {
+    window.open(`sms:${cleanPhone}?body=${encodeURIComponent(buildSMS())}`, '_self');
+    setSent(true);
+  };
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
         marginTop: "0.75rem",
-        background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)",
-        border: "1px solid #86efac",
+        background: "linear-gradient(135deg, #f0f9ff, #e0f2fe)",
+        border: "1px solid #7dd3fc",
         borderRadius: 12,
         padding: "1rem",
         display: "flex",
@@ -27,43 +54,47 @@ function AftercareLinkBox({ phone, visitId }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <span style={{ fontSize: "1.2rem" }}>✅</span>
+        <span style={{ fontSize: "1.2rem" }}>💬</span>
         <span style={{
-          color: "#15803d",
+          color: "#0369a1",
           fontWeight: 800,
           fontSize: "0.9rem",
           textTransform: 'uppercase'
         }}>
-          Aftercare Chat Ready
+          Aftercare SMS Ready
         </span>
       </div>
 
-      <div style={{ color: "#166534", fontSize: "0.85rem", lineHeight: 1.5 }}>
-        The personalized aftercare portal has been generated. Send the secure link below to the patient's WhatsApp.
-      </div>
-      
-      {/* Visual representation of the link so the receptionist knows what they are sending */}
-      <div style={{ 
-        background: "white", 
-        border: "1px solid #bbf7d0", 
-        borderRadius: 8, 
-        padding: "0.5rem 0.75rem", 
-        fontSize: "0.75rem", 
-        color: "#15803d",
-        fontFamily: "monospace",
-        wordBreak: "break-all"
-      }}>
-        {chatUrl}
+      <div style={{ color: "#075985", fontSize: "0.85rem", lineHeight: 1.5 }}>
+        Sends the patient a greeting, their prescription list, and the aftercare portal link via SMS.
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.2rem' }}>
-        <button 
-          onClick={() => navigator.clipboard.writeText(chatUrl)}
+      {/* SMS preview */}
+      <div style={{
+        background: "white",
+        border: "1px solid #bae6fd",
+        borderRadius: 8,
+        padding: "0.6rem 0.75rem",
+        fontSize: "0.74rem",
+        color: "#0c4a6e",
+        fontFamily: "monospace",
+        lineHeight: 1.7,
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-all",
+        maxHeight: 150,
+        overflowY: "auto"
+      }}>
+        {buildSMS()}
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <button
+          onClick={() => navigator.clipboard.writeText(buildSMS())}
           style={{
             flex: 1,
             background: "white",
-            border: "1px solid #16a34a",
-            color: "#16a34a",
+            border: "1px solid #0284c7",
+            color: "#0284c7",
             borderRadius: 8,
             padding: "0.6rem 1rem",
             fontSize: "0.8rem",
@@ -71,36 +102,37 @@ function AftercareLinkBox({ phone, visitId }) {
             cursor: "pointer",
             transition: "all 0.2s"
           }}
-          onMouseEnter={e => e.target.style.background = "#f0fdf4"}
-          onMouseLeave={e => e.target.style.background = "white"}
+          onMouseEnter={e => e.currentTarget.style.background = "#f0f9ff"}
+          onMouseLeave={e => e.currentTarget.style.background = "white"}
         >
-          Copy Link
+          Copy
         </button>
 
-        <a
-          href={`https://wa.me/${cleanPhone}?text=${waMessage}`}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          onClick={handleSend}
           style={{
             flex: 2,
-            textDecoration: "none",
-            background: "#25d366",
+            background: sent ? "#0369a1" : "#0284c7",
             color: "white",
+            border: "none",
             borderRadius: 8,
             padding: "0.6rem 1rem",
             fontSize: "0.8rem",
             fontWeight: 700,
-            textAlign: "center",
+            cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "0.4rem",
-            boxShadow: "0 2px 4px rgba(37, 211, 102, 0.2)"
+            transition: "background 0.2s",
+            boxShadow: "0 2px 4px rgba(2,132,199,0.25)"
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          Send via WhatsApp
-        </a>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+          </svg>
+          {sent ? "✓ Opened Messages" : `Send SMS to ${phone}`}
+        </button>
       </div>
     </div>
   );
@@ -436,18 +468,18 @@ export default function Receptionist() {
                 </>
               )}
 
-              {/* NEW AFTERCARE LINK BOX */}
+              {/* AFTERCARE SMS BOX — shown in modal once bill is paid */}
               {selectedPatientView.bill?.status === 'paid' ? (
-                // Now passing the actual visit ID so the link can be generated!
-                <AftercareLinkBox 
-                  phone={selectedPatientView.patients?.phone} 
-                  visitId={selectedPatientView.id} 
+                <AftercareLinkBox
+                  phone={selectedPatientView.patients?.phone}
+                  visitId={selectedPatientView.id}
+                  visit={selectedPatientView}
                 />
               ) : (
-                 <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
-                    <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💬</div>
-                    <div>The Aftercare Chat link will be generated here once the bill is marked as Paid.</div>
-                 </div>
+                <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💬</div>
+                  <div>The Aftercare SMS will be available here once the bill is marked as Paid.</div>
+                </div>
               )}
 
             </div>
@@ -724,9 +756,14 @@ export default function Receptionist() {
                                 {isPaid && <span className="r-paid-chip">✓ Paid</span>}
                               </div>
                             </div>
+                            {/* AFTERCARE SMS BOX — shown in billing tab after marking paid */}
                             {isPaid && (
                               <div style={{ borderTop: "none", marginBottom: "1rem" }} onClick={(e) => e.stopPropagation()}>
-                                <AftercareLinkBox phone={bill.visits?.patients?.phone} visitId={bill.visit_id} />
+                                <AftercareLinkBox
+                                  phone={bill.visits?.patients?.phone}
+                                  visitId={bill.visit_id}
+                                  visit={bill.visits}
+                                />
                               </div>
                             )}
                           </div>
