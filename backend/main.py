@@ -21,10 +21,11 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 app = FastAPI(title="VitalsFlow API")
 
 # --- UPDATED CORS CONFIGURATION ---
+# main.py
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://vitals-flow.vercel.app",
+    "https://vitals-flow.vercel.app" # No trailing slash!
 ]
 
 app.add_middleware(
