@@ -290,6 +290,36 @@ export default function DoctorPortal() {
     EmptyQueue: () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg>,
   };
 
+  const labelStyle = {
+    display: 'block',
+    fontSize: '0.65rem',
+    fontWeight: '700',
+    color: '#64748b',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '0.35rem'
+  };
+
+  const valueStyle = {
+    display: 'block',
+    fontSize: '0.95rem',
+    fontWeight: '700',
+    color: '#0f172a'
+  };
+
+  const vitalPillStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0.6rem 0.85rem',
+    background: '#ffffff',
+    borderRadius: '10px',
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+  };
+
   if (view === 'select') return (
     <>
       <style>{`
@@ -395,10 +425,7 @@ export default function DoctorPortal() {
         .d-card-body { flex:1; overflow-y:auto; padding: 1.5rem; }
 
         .d-patient-info-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:1.25rem; margin-bottom:1.5rem; }
-        .d-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-top:0.75rem; }
-        .d-info-label { font-size:0.7rem; font-weight:600; color:#94a3b8; text-transform:uppercase; }
-        .d-info-value { font-size:0.95rem; font-weight:600; color:#1e293b; }
-
+        
         .d-record-btn { width:100%; padding: 0.85rem; border:none; border-radius:10px; font-size:0.95rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.6rem; }
         .d-record-start { background: linear-gradient(135deg, #ef4444, #dc2626); color:white; }
         .d-record-stop  { background:#ffffff; color:#0f172a; border:1px solid #e2e8f0; }
@@ -552,23 +579,78 @@ export default function DoctorPortal() {
                 <div className="d-card">
                   <div className="d-card-header"><div className="d-card-icon"><Icons.Mic/></div><span className="d-card-title">AI Scribe</span></div>
                   <div className="d-card-body">
-                    {/* UPDATED PATIENT PROFILE BOX WITH ALL DETAILS */}
-                    <div className="d-patient-info-box">
-                      <div style={{fontSize:'0.7rem',fontWeight:'700',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:'0.75rem'}}>Patient Profile & Vitals</div>
-                      <div className="d-info-grid">
-                        <div className="d-info-item"><span className="d-info-label">Name</span><span className="d-info-value">{selectedVisit.patients?.name}</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Age / Gender</span><span className="d-info-value">{selectedVisit.patients?.age} yrs</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Phone</span><span className="d-info-value">{selectedVisit.patients?.phone || '—'}</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Blood Pressure</span><span className="d-info-value">{selectedVisit.sbp}/{selectedVisit.dbp} mmHg</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Heart Rate</span><span className="d-info-value">{selectedVisit.hr} bpm</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Resp. Rate</span><span className="d-info-value">{selectedVisit.rr} bpm</span></div>
-                        <div className="d-info-item"><span className="d-info-label">SpO2</span><span className="d-info-value">{selectedVisit.saturation}%</span></div>
-                        <div className="d-info-item"><span className="d-info-label">Temperature</span><span className="d-info-value">{selectedVisit.bt}°C</span></div>
+                    {/* CLEANER PATIENT PROFILE BOX */}
+                    <div className="d-patient-info-box" style={{ 
+                      background: '#ffffff', 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '20px', 
+                      padding: '1.5rem', 
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(3, 1fr)', 
+                        gap: '1.5rem 1rem',
+                        alignItems: 'start'
+                      }}>
+                        {/* Row 1: Demographics */}
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Patient Name</span>
+                          <span style={valueStyle}>{selectedVisit.patients?.name}</span>
+                        </div>
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Age / Gender</span>
+                          <span style={valueStyle}>{selectedVisit.patients?.age} yrs</span>
+                        </div>
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Contact</span>
+                          <span style={valueStyle}>{selectedVisit.patients?.phone || '—'}</span>
+                        </div>
+
+                        {/* Divider Line */}
+                        <div style={{ gridColumn: 'span 3', height: '1px', background: '#f1f5f9', margin: '0.5rem 0' }}></div>
+
+                        {/* Row 2: Primary Vitals */}
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Blood Pressure</span>
+                          <div style={vitalPillStyle}>
+                            <span style={{color: '#ef4444', marginRight: '6px', fontSize: '0.6rem'}}>●</span>
+                            {selectedVisit.sbp}/{selectedVisit.dbp} <small style={{fontWeight: 400, opacity: 0.6, marginLeft: '4px'}}>mmHg</small>
+                          </div>
+                        </div>
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Heart Rate</span>
+                          <div style={vitalPillStyle}>{selectedVisit.hr} <small style={{fontWeight: 400, opacity: 0.6, marginLeft: '4px'}}>bpm</small></div>
+                        </div>
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Oxygen (SpO2)</span>
+                          <div style={vitalPillStyle}>{selectedVisit.saturation}%</div>
+                        </div>
+
+                        {/* Row 3: Secondary Vitals */}
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Resp. Rate</span>
+                          <div style={vitalPillStyle}>{selectedVisit.rr} <small style={{fontWeight: 400, opacity: 0.6, marginLeft: '4px'}}>bpm</small></div>
+                        </div>
+                        <div className="d-info-item">
+                          <span style={labelStyle}>Body Temp</span>
+                          <div style={vitalPillStyle}>{selectedVisit.bt}°C</div>
+                        </div>
                       </div>
+
                       {selectedVisit.symptoms && (
-                        <div style={{marginTop:'1rem', padding:'0.75rem', background:'white', borderRadius:'8px', border:'1px solid #e2e8f0'}}>
-                          <span className="d-info-label">Triage Notes:</span>
-                          <p style={{fontSize:'0.85rem', color:'#475569', marginTop:'0.25rem', fontStyle:'italic'}}>{selectedVisit.symptoms}</p>
+                        <div style={{ 
+                          marginTop: '1.5rem', 
+                          padding: '1rem', 
+                          background: '#f8fafc', 
+                          borderRadius: '12px', 
+                          border: '1px solid #edf2f7' 
+                        }}>
+                          <span style={{...labelStyle, marginBottom: '0.4rem', display: 'block'}}>Initial Triage Notes</span>
+                          <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: '1.5', fontStyle: 'italic' }}>
+                            "{selectedVisit.symptoms}"
+                          </p>
                         </div>
                       )}
                     </div>
